@@ -260,6 +260,7 @@ function db:load_theme(opts)
         local header_image = vim.g.header_image
         if header_image then
             header_image.global_state.backend.clear(header_image.id, true)
+            vim.g.header_image = nil
         end
       end
       -- clean up if there are no dashboard buffers at all
