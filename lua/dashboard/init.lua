@@ -268,6 +268,7 @@ function db:load_theme(opts)
         self:cache_opts()
         clean_ctx()
         pcall(api.nvim_del_autocmd, opt.id)
+        fn.garbagecollect()
       end
     end,
     desc = '[Dashboard] clean dashboard data reduce memory',

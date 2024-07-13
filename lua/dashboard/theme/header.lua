@@ -1,5 +1,7 @@
-local api = vim.api
+local api, fn = vim.api, vim.fn
+local has_image, image_api = pcall(require, "image")
 local utils = require('dashboard.utils')
+
 
 local function week_ascii_text()
   return {
@@ -109,11 +111,16 @@ local function generate_header(config)
   end
   if not config.command then
     if config.image then
-        local image_api = require("image")
+        if not has_image then
+            local err = "dashboard.nvim: image module not found, please install image.nvim"
+            api.nvim_err_writeln(err)
+            error(err)
+        end
+
         local function render_image(image)
             if image == nil then return end
 
-            local window = vim.fn.winsaveview()
+            local window = fn.winsaveview()
 
             local x = math.floor((vim.o.columns - image.image_width / 10) / 2)
             local y = -window.topline + 1
@@ -142,12 +149,12 @@ local function generate_header(config)
                 width = vim.o.columns,
                 height = vim.o.lines
             }))
-        else
-            image_api.from_url(config.image, {
-                width = vim.o.columns,
-                height = vim.o.lines
-            }, render_image)
+            return
         end
+        image_api.from_url(config.image, {
+            width = vim.o.columns,
+            height = vim.o.lines
+        }, render_image)
 
         return
     end
