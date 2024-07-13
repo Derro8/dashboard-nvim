@@ -13,6 +13,7 @@
 
 
 # Install
+- You'll probably want to follow the install instructions for [image.nvim](https://github.com/3rd/image.nvim)
 
 - Lazy.nvim
 
@@ -20,12 +21,10 @@
 {
   'nvimdev/dashboard-nvim',
   event = 'VimEnter',
-  config = function()
-    require('dashboard').setup {
+  opts = {
       -- config
-    }
-  end,
-  dependencies = { {'nvim-tree/nvim-web-devicons'}}
+  }
+  dependencies = { {'image.nvim'}, {'nvim-tree/nvim-web-devicons'}}
 }
 ```
 
@@ -40,7 +39,7 @@ use {
       -- config
     }
   end,
-  requires = {'nvim-tree/nvim-web-devicons'}
+  requires = {'image.nvim', 'nvim-tree/nvim-web-devicons'}
 }
 ```
 
@@ -75,6 +74,7 @@ the `config` field is used for theme. general field
 ```lua
 config = {
   header -- type is table def
+  image -- image path or url
   week_header = {
     enable  --boolean use a week header
     concat  --concat string after time string line

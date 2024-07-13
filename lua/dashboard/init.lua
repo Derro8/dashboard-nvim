@@ -77,6 +77,7 @@ local function buf_local()
     ['filetype'] = 'dashboard',
     ['wrap'] = false,
     ['signcolumn'] = 'no',
+    ['winbar'] = '',
   }
   for opt, val in pairs(opts) do
     vim.opt_local[opt] = val
@@ -94,7 +95,6 @@ function db:save_user_options()
   self.user_cursor_line = vim.opt.cursorline:get()
   self.user_laststatus_value = vim.opt.laststatus:get()
   self.user_tabline_value = vim.opt.showtabline:get()
-  self.user_winbar_value = vim.opt.winbar:get()
 end
 
 function db:set_ui_options(opts)
@@ -103,9 +103,6 @@ function db:set_ui_options(opts)
   end
   if opts.hide.tabline then
     vim.opt.showtabline = 0
-  end
-  if opts.hide.winbar then
-    vim.opt.winbar = ''
   end
 end
 
@@ -120,10 +117,6 @@ function db:restore_user_options(opts)
 
   if opts.hide.tabline and self.user_tabline_value then
     vim.opt.showtabline = tonumber(self.user_tabline_value)
-  end
-
-  if opts.hide.winbar and self.user_winbar_value then
-    vim.opt.winbar = self.user_winbar_value
   end
 end
 
@@ -218,6 +211,26 @@ function db:load_theme(opts)
     end,
   })
 
+  api.nvim_create_autocmd("WinScrolled", {
+      callback = function(opt)
+        local buf = vim.bo[opt.buf]
+
+        if not buf or buf.filetype ~= "dashboard" then
+             return
+        end
+
+        local header_image = vim.g.header_image
+        if not header_image then return end
+
+        local window = vim.fn.winsaveview()
+
+        local x = math.floor((vim.o.columns - header_image.image_width / 10) / 2)
+        local y = -window.topline + 1
+
+        header_image.global_state.backend.render(header_image, x, y, header_image.image_width, header_image.image_height)
+      end
+  })
+
   api.nvim_create_autocmd('BufEnter', {
     callback = function(opt)
       if vim.bo.filetype == 'dashboard' then
@@ -241,6 +254,14 @@ function db:load_theme(opts)
         self:restore_user_options(opts)
       end
 
+      local buf = vim.bo[opt.buf]
+
+      if buf.filetype ~= "dashboard" then
+        local header_image = vim.g.header_image
+        if header_image then
+            header_image.global_state.backend.clear(header_image.id, true)
+        end
+      end
       -- clean up if there are no dashboard buffers at all
       if #bufs == 0 then
         self:cache_opts()
